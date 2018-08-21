@@ -1,3 +1,5 @@
+import re
+import omdb
 
 def remove_chars(sentence):
     sentence = sentence[1:-1:1]
@@ -110,7 +112,7 @@ def word_counter(sentence):
                 output[x] = 1
         else:
             dot = x[len(x)-1:len(x)]
-            x = x[0:len(x)-1:1]
+            x = x[0:len(x)-1]
             if x in output:
                 output[x] += 1
             else:
@@ -121,8 +123,44 @@ def word_counter(sentence):
                 output[dot] = 1
     return output
 
-string = word_counter("Ala ma kota. Ala ma psa.")
-print(string)
+#string = word_counter("Ala ma kota. Ala ma psa.")
+#print(string)
 
 answer = {"Ala": 2, "ma": 2, "kota.": 1, "psa.": 1}
 #assert word_counter("Ala ma kota. Ala ma psa.") == answer
+
+def validatePIN(PIN):
+    #return False if re.fullmatch("\d{4}",PIN) is None else True
+    return bool(re.fullmatch("\d{4}",PIN))
+#assert validatePIN("1234") == True, "Wrong validation!"
+#assert validatePIN("12345") == False, "Wrong validation!"
+#assert validatePIN("a234") == False, "Wrong validation!"
+
+
+def validate_input(word):
+    # Write a simple regex to validate a username. Allowed characters are:
+    # lowercase letters, numbers, underscore
+    # Length should be between 5 and 20 characters (both included).
+    if (len(word) < 5 and len(word) > 20):  return False
+    return False if (len(re.findall(r"[a-z_\d]", word)) != len(word)) is True else True
+
+
+#assert validate_input("Summer Academmy") == False, "Bad validation!"
+#assert validate_input("Summer_Academmy") == False, "Bad validation!"
+#assert validate_input("summer_academmy") == True, "Bad validation!"
+
+
+def valid_braces(sentence):
+    if len(re.findall(r"[[]", sentence)) != len(re.findall(r"[]]", sentence))\
+            or len(re.findall(r"[{]", sentence)) != len(re.findall(r"[}]", sentence))\
+            or len(re.findall(r"[(]", sentence)) != len(re.findall(r"[)]", sentence)):
+        return False
+    else:
+        return True
+
+
+
+#assert valid_braces("(){}[]") == True, "Wrong answer!"
+#assert valid_braces("([{}])") == True, "Wrong answer!"
+#assert valid_braces("(}") == False, "Wrong answer!"
+#assert valid_braces("[(])") == False, "Wrong answer!"
