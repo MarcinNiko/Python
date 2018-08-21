@@ -62,9 +62,67 @@ def who_likes_it(list_of_likes):
         return (f"{list_of_likes[0]}, {list_of_likes[1]} and {len(list_of_likes)-2} others like this")
 
 
-assert who_likes_it([]) == "no one likes this", "Wrong like count!"
-assert who_likes_it(["Ryszard"]) == "Ryszard likes this", "Wrong like count!"
-assert who_likes_it(["Marcin", "Michal"]) == "Marcin and Michal like this", "Wrong like count!"
-assert who_likes_it(["Edyta", "Igor", "Kamil"]) == "Edyta, Igor and Kamil like this", "Wrong like count!"
-assert who_likes_it(["Michal", "Maciej", "Bartosz", "Przemek"]) == "Michal, Maciej and 2 others like this", "Wrong like count!"
+#assert who_likes_it([]) == "no one likes this", "Wrong like count!"
+#assert who_likes_it(["Ryszard"]) == "Ryszard likes this", "Wrong like count!"
+#assert who_likes_it(["Marcin", "Michal"]) == "Marcin and Michal like this", "Wrong like count!"
+#assert who_likes_it(["Edyta", "Igor", "Kamil"]) == "Edyta, Igor and Kamil like this", "Wrong like count!"
+#assert who_likes_it(["Michal", "Maciej", "Bartosz", "Przemek"]) == "Michal, Maciej and 2 others like this", "Wrong like count!"
 
+def count_duplicates(sentence, how_many_times):
+    sentence = [x for x in sentence if (sentence.count(x) == how_many_times)]
+    output = ""
+    for i in range(len(sentence)):
+        if i%how_many_times == 0:
+            output += sentence[i]
+    return output
+
+#string = count_duplicates("aabcdddee", 2)
+#print(string)
+#assert count_duplicates("aabcdddee", 2) == "ae", "Failed to count!" # only 'a' end 'e' were present 2 times.
+#assert count_duplicates("indivisibility", 6) == "i", "Failed to count!"
+#assert count_duplicates("Karima", 1) == "Krim", "Failed to count!"
+
+
+names = {
+    "Marcin": 1,
+    "Patryk": 1,
+    "Norbert": 0,
+}
+
+if "Michal" in names:
+    names["Michal"] += 2
+else:
+    names["Michal"] = 2
+#print(names)
+
+names.pop("Norbert", None)
+#print(names)
+
+
+def word_counter(sentence):
+    sentence_as_list = list(sentence.split(' '))
+    output = {}
+    for x in sentence_as_list:
+        if  x.isalnum():
+            if x in output:
+                output[x] += 1
+            else:
+                output[x] = 1
+        else:
+            dot = x[len(x)-1:len(x)]
+            x = x[0:len(x)-1:1]
+            if x in output:
+                output[x] += 1
+            else:
+                output[x] = 1
+            if dot in output:
+                output[dot] += 1
+            else:
+                output[dot] = 1
+    return output
+
+string = word_counter("Ala ma kota. Ala ma psa.")
+print(string)
+
+answer = {"Ala": 2, "ma": 2, "kota.": 1, "psa.": 1}
+#assert word_counter("Ala ma kota. Ala ma psa.") == answer
