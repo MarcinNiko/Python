@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 import os
 import requests
+import json
 
 omdb.set_default('apikey', "81c13a05")
 running = 1
@@ -27,24 +28,34 @@ def sort_key(d):
         return d['imdb_votes']
 
 
-print("Press 1 if u want to load movies from file or 2 if u want to type names of the movies")
-user_choice = input()
-if user_choice == "1":
-    list_of_requests = os.listdir('/Movies')
-    list_of_titles = []
-    # erasing unwanted words from file names
-    for x in list_of_requests:
-        for y in words_to_erase:
-            x = x.replace(y, '')
-        list_of_titles.append(x)
-    list_of_requests = []
-    for x in list_of_titles:
+def create_path(title_as_list):
+    for x in title_as_list:
         if x[0] == ' ':
             x = x[1:]
         if not os.path.isdir(f'/MoviesData'):
             os.mkdir(f'/MoviesData')
         if not os.path.isdir(f'/MoviesData/{x}'):
             os.mkdir(f'/MoviesData/{x}')
+
+
+def erase_words(list_of_requests):
+    # erasing unwanted words from file names
+    for x in list_of_requests:
+        for y in words_to_erase:
+            x = x.replace(y, '')
+        list_of_titles.append(x)
+    return list_of_titles
+
+
+print("Press 1 if u want to load movies from file or 2 if u want to type names of the movies")
+user_choice = input()
+if user_choice == "1":
+    list_of_requests = os.listdir('/Movies')
+    list_of_titles = []
+    list_of_titles = erase_words(list_of_requests)
+    list_of_requests = []
+    create_path(list_of_titles)
+    for x in list_of_titles:
         res = omdb.get(title=x)
         list_of_requests.append(res)
     for y in list_of_requests:
@@ -62,6 +73,8 @@ if user_choice == "1":
         i += 1
         print("\n")
         f.write("\n")
+    # r = requests.get("http://gdata.youtube.com/feeds/api/standardfeeds/top_rated?v=2&alt=jsonc")
+    # data = json.loads(r.text)
     i = 0
     list_of_requests = []
 elif user_choice == "2":
@@ -78,11 +91,8 @@ elif user_choice == "2":
             title = re.sub(type_of_sorting, '', title)
             type_of_sorting = type_of_sorting[1:]
         title_as_list = list(title.split(', '))
+        create_path(title_as_list)
         for x in title_as_list:
-            if not os.path.isdir(f'/MoviesData'):
-                os.mkdir(f'/MoviesData')
-            if not os.path.isdir(f'/MoviesData/{x}'):
-                os.mkdir(f'/MoviesData/{x}')
             res = omdb.get(title=x)
             # removing "," from imdb_votes
             for char in res['imdb_votes']:
