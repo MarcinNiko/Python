@@ -2,17 +2,18 @@ import omdb
 import re
 from datetime import datetime
 import os
+import requests
 
-omdb.set_default('apikey',"81c13a05")
+omdb.set_default('apikey', "81c13a05")
 running = 1
 i = 0
 list_of_requests = []
 type_of_sorting = "No"
 words_to_erase = ['5.1', '7.1', '5 1', '7 1', 'DUAL AUDIO', 'DUAL-AUDIO', 'MULTI-CHANNEL', 'Ita-Eng',
-'2160p', '4K', '1080p', '720p', '480p', '360p', 'HD', 'FULL HD', 'FULLHD',
-'x264', 'CH', 'X264', 'HEVC', 'DVD',
-'WEB-DL', 'BrRip', 'Rip', 'DVDRip', 'XviD', 'BLURAY',
-'EXTENDED', 'REMASTERED', 'DIRECTORS', 'UNRATED', 'AlTERNATE', '.avi', '.mkv']
+                  '2160p', '4K', '1080p', '720p', '480p', '360p', 'HD', 'FULL HD', 'FULLHD',
+                  'x264', 'CH', 'X264', 'HEVC', 'DVD',
+                  'WEB-DL', 'BrRip', 'Rip', 'DVDRip', 'XviD', 'BLURAY',
+                  'EXTENDED', 'REMASTERED', 'DIRECTORS', 'UNRATED', 'AlTERNATE', '.avi', '.mkv']
 
 
 def sort_key(d):
@@ -31,22 +32,36 @@ user_choice = input()
 if user_choice == "1":
     list_of_requests = os.listdir('/Movies')
     list_of_titles = []
+    # erasing unwanted words from file names
     for x in list_of_requests:
         for y in words_to_erase:
             x = x.replace(y, '')
         list_of_titles.append(x)
-    print(list_of_titles)
     list_of_requests = []
     for x in list_of_titles:
+        if x[0] == ' ':
+            x = x[1:]
+        if not os.path.isdir(f'/MoviesData'):
+            os.mkdir(f'/MoviesData')
+        if not os.path.isdir(f'/MoviesData/{x}'):
+            os.mkdir(f'/MoviesData/{x}')
         res = omdb.get(title=x)
         list_of_requests.append(res)
     for y in list_of_requests:
         for key, value in list_of_requests[i].items():
             if key == "released" and value != "N/A":
                 value = datetime.strptime(value, '%d %b %Y').strftime("%d.%m.%Y")
+            if key == 'title':
+                current_title = value
+                f = open(f"/MoviesData/{value}/{value}.txt", "w+")
+            if key == 'poster' and value != "N/A":
+                r = requests.get(value, allow_redirects=True)
+                open(f'/MoviesData/{current_title}/poster.jpg', 'wb').write(r.content)
             print(f"{key}: {value}")
+            f.write(f"{key}: {value}\n")
         i += 1
         print("\n")
+        f.write("\n")
     i = 0
     list_of_requests = []
 elif user_choice == "2":
@@ -56,28 +71,43 @@ elif user_choice == "2":
         if title == "end":
             running = 0
             break
-        if re.findall(r"[:]",title):
+        # seperating titles and type of sorting from input
+        if re.findall(r"[:]", title):
             word_list = title.split()
             type_of_sorting = word_list[-1]
-            title = re.sub(type_of_sorting,'',title)
+            title = re.sub(type_of_sorting, '', title)
             type_of_sorting = type_of_sorting[1:]
         title_as_list = list(title.split(', '))
         for x in title_as_list:
-            os.mkdir(f'/Movies/{x}')
+            if not os.path.isdir(f'/MoviesData'):
+                os.mkdir(f'/MoviesData')
+            if not os.path.isdir(f'/MoviesData/{x}'):
+                os.mkdir(f'/MoviesData/{x}')
             res = omdb.get(title=x)
+            # removing "," from imdb_votes
             for char in res['imdb_votes']:
                 if char in ",":
                     res['imdb_votes'] = res['imdb_votes'].replace(',', '')
             list_of_requests.append(res)
+            # chcecking if user wants to sort output somehow
         if type_of_sorting != "No":
             list_of_requests.sort(key=sort_key, reverse=True)
         for y in list_of_requests:
             for key, value in list_of_requests[i].items():
+                # changing formatting of data
                 if key == "released" and value != "N/A":
                     value = datetime.strptime(value, '%d %b %Y').strftime("%d.%m.%Y")
+                if key == 'title':
+                    current_title = value
+                    f = open(f"/MoviesData/{value}/{value}.txt", "w+")
+                if key == 'poster' and value != "N/A":
+                    r = requests.get(value, allow_redirects=True)
+                    open(f'/MoviesData/{current_title}/poster.jpg', 'wb').write(r.content)
                 print(f"{key}: {value}")
+                f.write(f"{key}: {value}\n")
             i += 1
             print("\n")
+            f.write("\n")
         i = 0
         list_of_requests = []
 else:
